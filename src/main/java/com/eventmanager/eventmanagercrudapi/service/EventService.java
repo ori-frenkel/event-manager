@@ -3,23 +3,31 @@ package com.eventmanager.eventmanagercrudapi.service;
 import com.eventmanager.eventmanagercrudapi.exceptions.EventNotFoundException;
 import com.eventmanager.eventmanagercrudapi.model.Event;
 import com.eventmanager.eventmanagercrudapi.repository.EventRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class EventService {
 
     private final EventRepository eventRepository;
+    private final ReminderService reminderService;
+
+    @Autowired
+    public EventService(EventRepository eventRepository, ReminderService reminderService) {
+        this.eventRepository = eventRepository;
+        this.reminderService = reminderService;
+    }
 
     @Transactional
     public void addEvent(Event event) {
         eventRepository.save(event);
+        reminderService.scheduleReminder(event);
     }
     public List<Event> getAllEvents(String location,String sortBy, String sortDirection) {
         List<Event> events;
@@ -50,18 +58,16 @@ public class EventService {
 
     @Transactional
     public Event updateEvent(Long eventId, Event updatedEvent) {
-        Optional<Event> optionalEvent = eventRepository.findById(eventId);
+        Optional<Event> optionalCurrentEvent = eventRepository.findById(eventId);
 
-        if (optionalEvent.isPresent()) {
-            Event existingEvent = optionalEvent.get();
+        if (optionalCurrentEvent.isPresent()) {
+            Event oldEvent = optionalCurrentEvent.get();
+            LocalDateTime oldEventDate = oldEvent.getDate();
+            Event existingEventAfterUpdate = oldEvent.update(updatedEvent);
 
-            existingEvent.setName(updatedEvent.getName());
-            existingEvent.setInformation(updatedEvent.getInformation());
-            existingEvent.setLocation(updatedEvent.getLocation());
-            existingEvent.setDate(updatedEvent.getDate());
-            existingEvent.setPopularity(updatedEvent.getPopularity());
+            handleUpdateScheduler(updatedEvent, oldEventDate, existingEventAfterUpdate);
 
-            return eventRepository.save(existingEvent);
+            return eventRepository.save(existingEventAfterUpdate);
         } else {
             throw new EventNotFoundException(eventId);
         }
@@ -74,6 +80,7 @@ public class EventService {
         if (optionalEvent.isPresent()) {
             Event eventToDelete = optionalEvent.get();
             eventRepository.delete(eventToDelete);
+            reminderService.cancelEvent(eventId);
 
             return true;
         } else {
@@ -104,5 +111,12 @@ public class EventService {
             case "creationtime" -> Sort.by(direction, "creationTime");
             default -> Sort.by(direction, "date");
         };
+    }
+
+    private void handleUpdateScheduler(Event updatedEvent, LocalDateTime oldEventDate, Event existingEvent) {
+        if (!oldEventDate.equals(updatedEvent.getDate())) {
+            reminderService.cancelEvent(existingEvent.getId());
+            reminderService.scheduleReminder(existingEvent);
+        }
     }
 }
