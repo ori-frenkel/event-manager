@@ -33,8 +33,11 @@ public class EventController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<Event>> getAll() {
-        return ResponseEntity.ok(eventService.getAllEvents());
+    public ResponseEntity<List<Event>> getAll(
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String sortDirection) {
+        return ResponseEntity.ok(eventService.getAllEvents(location, sortBy, sortDirection));
     }
 
     @GetMapping("/{id}")

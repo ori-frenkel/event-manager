@@ -28,8 +28,16 @@ will be added
   ~~~
 
 - **Get All Events**: `GET /events`
+- 
   ~~~
+  basic request:
   curl --location 'http://localhost:8080/events' \
+  --header 'Cookie: JSESSIONID=26C1A12ADA023554BF6BCE08B5DBC00F' \
+  --data ''
+  ~~~
+- ~~~
+  http://localhost:8080/events?location=${LOCATION}&sortBy=${SORT_BY}&sortDirection=${SORT_DIRECTION}
+  For example: curl --location 'http://localhost:8080/events?location=israel' \
   --header 'Cookie: JSESSIONID=26C1A12ADA023554BF6BCE08B5DBC00F' \
   --data ''
   ~~~
