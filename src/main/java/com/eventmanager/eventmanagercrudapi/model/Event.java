@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class Event {
     @Id
@@ -34,4 +33,15 @@ public class Event {
     private LocalDateTime creationTime;
     private int popularity;
 
+
+    public Event update(Event otherEvent) {
+        if (otherEvent != null) {
+            this.setName(otherEvent.getName());
+            this.setInformation(otherEvent.getInformation());
+            this.setLocation(otherEvent.getLocation());
+            this.setDate(otherEvent.getDate());
+            this.setPopularity(otherEvent.getPopularity());
+        }
+        return this;
+    }
 }
