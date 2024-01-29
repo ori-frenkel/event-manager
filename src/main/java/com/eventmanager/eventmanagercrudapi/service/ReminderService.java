@@ -42,6 +42,14 @@ public class ReminderService {
         }
     }
 
+    public void clearAllReminders() {
+        for (Map.Entry<Long, ScheduledFuture<?>> entry : scheduledTasks.entrySet()) {
+            ScheduledFuture<?> scheduledFuture = entry.getValue();
+            scheduledFuture.cancel(true);
+        }
+        scheduledTasks.clear();
+    }
+
     @AllArgsConstructor
     private static class ReminderTask implements Runnable {
         private final Event event;
