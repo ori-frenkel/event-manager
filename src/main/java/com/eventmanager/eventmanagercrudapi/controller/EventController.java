@@ -13,7 +13,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import java.util.List;
 
 @RestController
-@RequestMapping("/events")
+@RequestMapping("/event")
 @Api(tags = "Event Controller", description = "APIs for managing events")
 public class EventController {
 
@@ -37,7 +37,7 @@ public class EventController {
         }
     }
     
-    @GetMapping()
+    @GetMapping("/all")
     @ApiOperation(
             value = "Get all events with optional filtering and sorting",
             notes = "Example request: /events?location=Tel-Aviv&sortBy=date&sortDirection=asc")
@@ -62,10 +62,10 @@ public class EventController {
         return ResponseEntity.ok(eventService.getEventById(id));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping()
     @ApiOperation("update event by id")
-    public ResponseEntity<Event> update(@PathVariable Long id, @RequestBody Event newEventDetails) {
-        return ResponseEntity.ok(eventService.updateEvent(id, newEventDetails));
+    public ResponseEntity<Event> update(@RequestBody Event newEventDetails) {
+        return ResponseEntity.ok(eventService.updateEvent(newEventDetails));
     }
 
     @DeleteMapping("/{id}")
