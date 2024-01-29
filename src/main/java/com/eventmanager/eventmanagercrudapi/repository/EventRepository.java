@@ -13,6 +13,5 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     Optional<Event> findById(int id);
     List<Event> findByLocation(String location);
     List<Event> findByLocation(String location, Sort sort);
-
     List<Event> findAll(Sort sort);
 }

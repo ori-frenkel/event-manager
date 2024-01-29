@@ -8,7 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +29,14 @@ public class EventService {
         eventRepository.save(event);
         reminderService.scheduleReminder(event);
     }
+
+    @Transactional
+    // Any exception thrown within this method will rollback the entire transaction
+    public void addEvents(List<Event> events) {
+        eventRepository.saveAll(events);
+        batchScheduleReminder(events);
+    }
+
     public List<Event> getAllEvents(String location,String sortBy, String sortDirection) {
         List<Event> events;
         boolean isLocationEmpty = location == null || location.isEmpty();
@@ -57,20 +65,51 @@ public class EventService {
     }
 
     @Transactional
-    public Event updateEvent(Long eventId, Event updatedEvent) {
+    public Event updateEvent(Event updatedEvent) {
+        Long eventId = updatedEvent.getId();
         Optional<Event> optionalCurrentEvent = eventRepository.findById(eventId);
 
-        if (optionalCurrentEvent.isPresent()) {
-            Event oldEvent = optionalCurrentEvent.get();
-            LocalDateTime oldEventDate = oldEvent.getDate();
-            Event existingEventAfterUpdate = oldEvent.update(updatedEvent);
+        if(optionalCurrentEvent.isPresent()) {
+            Event currentEvent = optionalCurrentEvent.get();
+            currentEvent.setName(updatedEvent.getName());
+            currentEvent.setInformation(updatedEvent.getInformation());
+            currentEvent.setLocation(updatedEvent.getLocation());
+            currentEvent.setDate(updatedEvent.getDate());
+            currentEvent.setPopularity(updatedEvent.getPopularity());
+            if (!currentEvent.getDate().equals(updatedEvent.getDate())) {
+                currentEvent.setDate(updatedEvent.getDate());
+                updateReminderSchedule(currentEvent);
+            }
 
-            handleUpdateScheduler(updatedEvent, oldEventDate, existingEventAfterUpdate);
-
-            return eventRepository.save(existingEventAfterUpdate);
+            return eventRepository.save(currentEvent);
         } else {
             throw new EventNotFoundException(eventId);
         }
+    }
+
+    @Transactional
+    public List<Event> updateEvents(List<Event> updatedEvents) {
+        ArrayList<Event> eventsThatNeedToReschedule = new ArrayList<>();
+
+        for (Event updatedEvent : updatedEvents) {
+            Optional<Event> existingEventOptional = eventRepository.findById(updatedEvent.getId());
+            existingEventOptional.ifPresentOrElse(existingEvent -> {
+                existingEvent.setName(updatedEvent.getName());
+                existingEvent.setInformation(updatedEvent.getInformation());
+                existingEvent.setLocation(updatedEvent.getLocation());
+                existingEvent.setDate(updatedEvent.getDate());
+                existingEvent.setPopularity(updatedEvent.getPopularity());
+                if (!existingEvent.getDate().equals(updatedEvent.getDate())) {
+                    existingEvent.setDate(updatedEvent.getDate());
+                    eventsThatNeedToReschedule.add(existingEvent);
+                }
+            }, () -> { throw new EventNotFoundException(updatedEvent.getId()); });
+        }
+
+        eventRepository.saveAll(updatedEvents);
+        eventReminderReschedule(eventsThatNeedToReschedule);
+
+        return updatedEvents;
     }
 
     @Transactional
@@ -86,6 +125,18 @@ public class EventService {
         } else {
             throw new EventNotFoundException(eventId);
         }
+    }
+
+    @Transactional
+    public boolean deleteEventBatchByIds(List<Long> eventIds) {
+        for (Long eventId : eventIds) {
+            Optional<Event> optionalEvent = eventRepository.findById(eventId);
+            optionalEvent.ifPresentOrElse(eventRepository::delete,
+                    () -> { throw new EventNotFoundException(eventId); });
+        }
+
+        eventIds.forEach(reminderService::cancelEvent);
+        return true;
     }
 
     private Sort.Direction getSortDirection(String sortDirection) {
@@ -113,10 +164,20 @@ public class EventService {
         };
     }
 
-    private void handleUpdateScheduler(Event updatedEvent, LocalDateTime oldEventDate, Event existingEvent) {
-        if (!oldEventDate.equals(updatedEvent.getDate())) {
-            reminderService.cancelEvent(existingEvent.getId());
-            reminderService.scheduleReminder(existingEvent);
+    private void eventReminderReschedule(ArrayList<Event> eventsThatNeedToReschedule) {
+        for (Event event : eventsThatNeedToReschedule) {
+            updateReminderSchedule(event);
         }
+    }
+
+    private void batchScheduleReminder(List<Event> events) {
+        for (Event event : events) {
+            reminderService.scheduleReminder(event);
+        }
+    }
+
+    private void updateReminderSchedule(Event existingEvent) {
+        reminderService.cancelEvent(existingEvent.getId());
+        reminderService.scheduleReminder(existingEvent);
     }
 }
