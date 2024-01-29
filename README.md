@@ -15,18 +15,23 @@ will be added
 
 
 # Example API Request
+-  **all requests needs basic auth with username:ori password; password**
+  ~~~ 
+  curl... -u ori:password
+  ~~~
 - **Create Event**: `POST /events/create`
   ~~~ 
   curl --location 'http://localhost:8080/events/create' \
   --header 'Content-Type: application/json' \
-  --header 'Cookie: JSESSIONID=26C1A12ADA023554BF6BCE08B5DBC00F' \
+  --header 'Authorization: Basic b3JpOnBhc3N3b3Jk' \
+  --header 'Cookie: JSESSIONID=2B4ACB8A5F5635DAF2076603362EDB48' \
   --data '{
-  "name": "Sample Event",
-  "information": "This is a sample event description.",
-  "location": "Sample Location",
-  "date": "2024-01-27T15:30:00",
-  "popularity": 0
-  }' 
+      "name": "Sample Event",
+      "information": "This is a sample event description.",
+      "location": "israel",
+      "date": "2023-01-27T15:30:00",
+      "popularity": 0
+  }'
   ~~~
 
 - **Get All Events**: `GET /events`
