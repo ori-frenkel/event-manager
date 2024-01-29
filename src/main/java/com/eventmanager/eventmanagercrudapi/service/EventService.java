@@ -74,7 +74,6 @@ public class EventService {
             currentEvent.setName(updatedEvent.getName());
             currentEvent.setInformation(updatedEvent.getInformation());
             currentEvent.setLocation(updatedEvent.getLocation());
-            currentEvent.setDate(updatedEvent.getDate());
             currentEvent.setPopularity(updatedEvent.getPopularity());
             if (!currentEvent.getDate().equals(updatedEvent.getDate())) {
                 currentEvent.setDate(updatedEvent.getDate());
@@ -137,6 +136,11 @@ public class EventService {
 
         eventIds.forEach(reminderService::cancelEvent);
         return true;
+    }
+
+    public void clearEvents() {
+        eventRepository.deleteAll();
+        reminderService.clearAllReminders();
     }
 
     private Sort.Direction getSortDirection(String sortDirection) {

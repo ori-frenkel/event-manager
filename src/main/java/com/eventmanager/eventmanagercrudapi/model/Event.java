@@ -1,5 +1,6 @@
 package com.eventmanager.eventmanagercrudapi.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Validated
 public class Event {
     @Id
@@ -26,6 +28,16 @@ public class Event {
     @CreationTimestamp
     private LocalDateTime creationTime;
     private int popularity;
+
+    //generate all args constructor
+
+    public Event(String name, String information, String location, LocalDateTime date, int popularity) {
+        this.name = name;
+        this.information = information;
+        this.location = location;
+        this.date = date;
+        this.popularity = popularity;
+    }
 
 
     public Event update(Event otherEvent) {
