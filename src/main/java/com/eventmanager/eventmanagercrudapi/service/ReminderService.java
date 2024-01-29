@@ -28,6 +28,8 @@ public class ReminderService {
         // Runnable reminderTask = () -> logger.info("event {} start in 30 minutes: ", eventName);
 
         long delay = calculateTaskDelay(event, minutesBeforeEventStart);
+        if (delay <= 0)
+            return;
 
         ScheduledFuture<?> scheduledFuture = scheduler.schedule(new ReminderTask(event), delay, TimeUnit.MILLISECONDS);
         scheduledTasks.put(event.getId(), scheduledFuture);
@@ -47,7 +49,7 @@ public class ReminderService {
         @Override
         public void run() {
             // For simplicity, let's log a reminder message
-            logger.info("Reminder: Event '{}' is scheduled to start in 30 minutes.", event.getName());
+            logger.info("Reminder: Event '{}' is scheduled to start in 30 minutes or less.", event.getName());
         }
     }
 

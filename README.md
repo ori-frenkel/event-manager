@@ -1,10 +1,15 @@
 # event-manager
 will be added
 
+# How to Run
+* run the main class - EventManagerCrudApiApplication
+* tested on java 19
+
 ## API Endpoints - Can be seen in the swagger documentation
-// todo, add swagger
 // todo, add authenticated
 
+# API 
+- **Generated Swagger documentation at: http://localhost:8080/swagger-ui/**
 - **Create Event**: `POST /events/create`
 - **Retrieve All Events**: `GET /events`
 - **Retrieve Event by ID**: `GET /events/{id}`
