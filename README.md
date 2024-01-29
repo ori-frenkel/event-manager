@@ -1,9 +1,6 @@
 # event-manager
 will be added
 
-# How to Run
-* run the main class - EventManagerCrudApiApplication
-* tested on java 19
 
 ## API Endpoints - Can be seen in the swagger documentation
 // todo, add authenticated
