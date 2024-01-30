@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.concurrent.ScheduledExecutorService;
+
 @ExtendWith(MockitoExtension.class)
 class ReminderServiceTest {
 

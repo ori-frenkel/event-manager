@@ -2,14 +2,15 @@ package com.eventmanager.eventmanagercrudapi.controller;
 
 import com.eventmanager.eventmanagercrudapi.model.Event;
 import com.eventmanager.eventmanagercrudapi.service.EventService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiImplicitParam;
+
 import java.util.List;
 
 @RestController
@@ -36,7 +37,7 @@ public class EventController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create event");
         }
     }
-    
+
     @GetMapping("/all")
     @ApiOperation(
             value = "Get all events with optional filtering and sorting",
