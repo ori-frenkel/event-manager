@@ -37,7 +37,7 @@ public class EventService {
         batchScheduleReminder(events);
     }
 
-    public List<Event> getAllEvents(String location,String sortBy, String sortDirection) {
+    public List<Event> getAllEvents(String location, String sortBy, String sortDirection) {
         List<Event> events;
         boolean isLocationEmpty = location == null || location.isEmpty();
         boolean isSortByEmpty = sortDirection == null || sortDirection.isEmpty();
@@ -48,7 +48,7 @@ public class EventService {
         } else if (!isLocationEmpty) {
             // find by location only
             events = eventRepository.findByLocation(location);
-        } else if (isSortByEmpty){
+        } else if (isSortByEmpty) {
             // find by given sort only
             events = eventRepository.findAll(getSortBy(sortBy, sortDirection));
         } else {
@@ -69,7 +69,7 @@ public class EventService {
         Long eventId = updatedEvent.getId();
         Optional<Event> optionalCurrentEvent = eventRepository.findById(eventId);
 
-        if(optionalCurrentEvent.isPresent()) {
+        if (optionalCurrentEvent.isPresent()) {
             Event currentEvent = optionalCurrentEvent.get();
             currentEvent.setName(updatedEvent.getName());
             currentEvent.setInformation(updatedEvent.getInformation());
@@ -102,7 +102,9 @@ public class EventService {
                     existingEvent.setDate(updatedEvent.getDate());
                     eventsThatNeedToReschedule.add(existingEvent);
                 }
-            }, () -> { throw new EventNotFoundException(updatedEvent.getId()); });
+            }, () -> {
+                throw new EventNotFoundException(updatedEvent.getId());
+            });
         }
 
         eventRepository.saveAll(updatedEvents);
@@ -131,7 +133,9 @@ public class EventService {
         for (Long eventId : eventIds) {
             Optional<Event> optionalEvent = eventRepository.findById(eventId);
             optionalEvent.ifPresentOrElse(eventRepository::delete,
-                    () -> { throw new EventNotFoundException(eventId); });
+                    () -> {
+                        throw new EventNotFoundException(eventId);
+                    });
         }
 
         eventIds.forEach(reminderService::cancelEvent);
